@@ -8,9 +8,31 @@ const hasUserMedia = () => {
 let video = document.querySelector('video');
 
 let constraints = {
-	 	video: true,
-	 	audio: true
+	 	video: {
+	 		mandatory: {
+	 			minWidth: 640,
+	 			minHeight: 480
+	 		}
+	 	},
+	 	audio: false
 	};
+
+	//very simple still unreliable user agent checker if mobile
+	if(/Android|webOS|iPhone|iPad|iPod|Blackberry|IEMobile|Opera Mini/i.test(navigator.userAgent)){
+		//The user is using a mobile device, lower our minimum resolution
+		constraints = {
+			video: {
+				mandatory: {
+					minWidth: 480,
+					minHeight: 320,
+					maxWidth: 1024,
+					maxHeight: 768
+				}
+			},
+			audio: true
+		};
+	}
+
 
 const successCallback = (stream) => {
 	
