@@ -11,6 +11,30 @@ const hasRTCPeerConnection = () => {
      return !!window.RTCPeerConnection;
 }
 
+
+let yourVideo = document.querySelector('#yours');
+let theirVideo = document.querySelector('#theirs');
+let yourConnection, theirConnection;
+
+
+const offerSuccess = (offer) => {
+
+	yourConnection.setLocalDescription(offer);
+	theirConnection.setRemoteDescription(offer);
+
+	theirConnection.createAnswer((offer) => {
+
+		theirConnection.setLocalDescription(offer);
+		yourConnection.setRemoteDescription(offer);
+	}, (error) => {
+		console.log('Answer error: ', error);
+	});
+};
+
+const offerError = (error) => {
+	console.log('Offer error:', error);
+}
+
 const startPeerConnection = (stream) => {
 
 	let configuration = {
@@ -24,8 +48,9 @@ const startPeerConnection = (stream) => {
 	//Setup stream listening
 	yourConnection.addStream(stream);
 
-	theirConnection.onaddstream = (e) => {
-		theirVideo.srcObject = e.stream;
+	theirConnection.onaddstream = function(event){
+
+		theirVideo.srcObject = event.stream;
 	}
 
 	//set up ice handling
@@ -42,26 +67,13 @@ const startPeerConnection = (stream) => {
 	};
 
 	//Begin the offer
-	yourConnection.createOffer((offer) => {
+	yourConnection.createOffer(offerSuccess, offerError);
 
-		yourConnection.setLocalDescription(offer);
-		theirConnection.setRemoteDescription(offer);
-
-		theirConnection.createAnswer((offer) => {
-
-			theirConnection.setLocalDescription(offer);
-			yourConnection.setRemoteDescription(offer);
-		})
-
-	});
 }
-
-let yourVideo = document.querySelector('#yours'),
-	theirVideo = document.querySelector('#theirs'),
-	yourConnection, theirConnection;
 
 //getUserMedia success
 const successCallback = (stream) => {
+
 		yourVideo.srcObject = stream;
 
 		if(hasRTCPeerConnection()){
